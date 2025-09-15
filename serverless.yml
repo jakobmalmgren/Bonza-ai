@@ -8,11 +8,10 @@ provider:
   runtime: nodejs20.x
   region: eu-north-1
   iam:
-    role:
+    role: arn:aws:iam::791493234438:role/cloudPushRole
   # Uncomment to easily set up a custom domain. Read the docs for more details:
   # https://www.serverless.com/framework/docs/providers/aws/guide/domains
   # domain: api.example.com
-
 
 functions:
   getBookings:
