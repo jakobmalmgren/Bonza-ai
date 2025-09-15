@@ -1,0 +1,58 @@
+# "org" ensures this Service is used with the correct Serverless Framework Access Key.
+org: jakobjavascript24
+# "service" is the name of this project. This will also be added to your AWS resource names.
+service: bonza
+
+provider:
+  name: aws
+  runtime: nodejs20.x
+  region: eu-north-1
+  iam:
+    role:
+  # Uncomment to easily set up a custom domain. Read the docs for more details:
+  # https://www.serverless.com/framework/docs/providers/aws/guide/domains
+  # domain: api.example.com
+
+
+functions:
+  getBookings:
+    handler: functions/getBookings/index.handler
+    events:
+      - httpApi:
+          path: /admin/bookings
+          method: get
+  postBooking:
+    handler: functions/postBooking/index.handler
+    events:
+      - httpApi:
+          path: /guest/booking
+          method: post
+  putBooking:
+    handler: functions/putBooking/index.handler
+    events:
+      - httpApi:
+          path: /guest/booking/{bookingId}
+          method: put
+  deleteBooking:
+    handler: functions/deleteBooking/index.handler
+    events:
+      - httpApi:
+          path: /guest/booking/{bookingId}
+          method: delete
+resources:
+  Resources:
+    HotelTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: HotelTable
+        AttributeDefinitions:
+          - AttributeName: pk
+            AttributeType: S
+          - AttributeName: sk
+            AttributeType: S
+        KeySchema:
+          - AttributeName: pk
+            KeyType: HASH
+          - AttributeName: sk
+            KeyType: RANGE
+        BillingMode: PAY_PER_REQUEST
