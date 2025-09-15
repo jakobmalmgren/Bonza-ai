@@ -1,5 +1,5 @@
 # "org" ensures this Service is used with the correct Serverless Framework Access Key.
-org: jakobjavascript24
+org: lindbergsala
 # "service" is the name of this project. This will also be added to your AWS resource names.
 service: bonza
 
@@ -8,7 +8,7 @@ provider:
   runtime: nodejs20.x
   region: eu-north-1
   iam:
-    role: arn:aws:iam::791493234438:role/cloudPushRole
+    role: arn:aws:iam::190164553494:role/Tenta
   # Uncomment to easily set up a custom domain. Read the docs for more details:
   # https://www.serverless.com/framework/docs/providers/aws/guide/domains
   # domain: api.example.com
