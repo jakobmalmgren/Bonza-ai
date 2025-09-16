@@ -62,24 +62,71 @@ export const handler = async (event) => {
       };
     }
 
-    return {
-      statusCode: 200,
-      body: JSON.stringify({
-        message: "Alla önskade rum finns tillgängliga",
-        success: true,
-        guest: {
-          name: body.name,
-          email: body.email,
-          guests: body.guests,
-          checkIn: body.checkIn,
-          checkOut: body.checkOut,
-        },
-        rooms: requestedRoomTypes,
-      }),
-    };
+    // return {
+    //   statusCode: 200,
+    //   body: JSON.stringify({
+    //     message: "Alla önskade rum finns tillgängliga",
+    //     success: true,
+    //     guest: {
+    //       name: body.name,
+    //       email: body.email,
+    //       guests: body.guests,
+    //       checkIn: body.checkIn,
+    //       checkOut: body.checkOut,
+    //     },
+    //     rooms: requestedRoomTypes,
+    //   }),
+    // };
 
     // 3. logik för at se om totala antal personer går ihop med rummen, räkna ut antal
     // nätter för rummen och pris så totala, sen dra ifrån de rummen man boka från DB
+    let totalBeds = 0;
+    for (const room of roomType) {
+      const { quantity, type } = room;
+      const sk = `ROOM#${type}`;
+      const command = new QueryCommand({
+        TableName: "HotelTable",
+        KeyConditionExpression: "pk = :pk AND sk = :sk",
+        ExpressionAttributeValues: { ":pk": { S: "ROOM" }, ":sk": { S: sk } },
+      });
+      const result = await client.send(command);
+      console.log("RESULT!!!:", result);
+      const item = result.Items?.[0];
+      if (!item) {
+        return {
+          statusCode: 400,
+          body: JSON.stringify({
+            message: `rumstypen${type} finns inte`,
+            success: false,
+          }),
+        };
+      }
+      const bedsPerRoom = parseInt(item.maxGuests.N);
+      totalBeds += bedsPerRoom * quantity;
+    }
+
+    if (totalBeds < guests) {
+      return {
+        statusCode: 400,
+        body: JSON.stringify({
+          message: `Totalt antal sängar (${totalBeds}) räcker inte för ${guests} gäster.`,
+          success: false,
+        }),
+      };
+    }
+
+    return {
+      statusCode: 200,
+      body: JSON.stringify({
+        message: "Sängar och rumstyper räcker för antal gäster",
+        success: true,
+      }),
+    };
+
+    // 4,
+    // - beräkna pris för antalet nätter och rum..
+    //skapa uuid för unikt boknings nr o skicka ttillbaka som response..
+    // skapa hela raden för de ja skickar tillbaka , de som då kommer in i tabellen me ny rad
   } catch (err) {
     return {
       statusCode: 400,
