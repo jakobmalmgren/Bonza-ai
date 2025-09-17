@@ -1,6 +1,5 @@
-import { DynamoDBClient, QueryCommand } from "@aws-sdk/client-dynamodb";
-
-const client = new DynamoDBClient({ region: "eu-north-1" });
+import { QueryCommand } from "@aws-sdk/client-dynamodb";
+import { client } from "../../services/db.mjs";
 
 export const handler = async (event) => {
   try {
