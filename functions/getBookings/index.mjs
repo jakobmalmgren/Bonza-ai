@@ -34,11 +34,3 @@ export const handler = async (event) => {
     };
   }
 };
-
-// Följande ska man kunna se om varje bokning:
-
-// Bokningsnummer
-// In-och utcheckningsdatum
-// Antal gäster
-// Antalet rum
-// Namn på den som bokade rummet
