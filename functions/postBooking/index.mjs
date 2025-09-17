@@ -115,7 +115,7 @@ export async function handler(event) {
       Put: {
         TableName: TABLE_NAME,
         Item: {
-          pk: { S: `BOOKEDROOM#${bookingId}` },
+          pk: { S: `BOOKEDROOM` },
           sk: { S: `BOOKING#${bookingId}` },
           name: { S: name },
           email: { S: email },
