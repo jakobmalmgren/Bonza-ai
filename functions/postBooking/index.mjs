@@ -1,11 +1,11 @@
 import {
-  DynamoDBClient,
   GetItemCommand,
   TransactWriteItemsCommand,
 } from "@aws-sdk/client-dynamodb";
 import { v4 as uuidv4 } from "uuid";
+import { client } from "../../services/db.mjs";
+import { sendResponse } from "../../utils/responses/index.mjs";
 
-const client = new DynamoDBClient({ region: "eu-north-1" });
 const TABLE_NAME = "HotelTable";
 
 export async function handler(event) {
@@ -21,20 +21,14 @@ export async function handler(event) {
       !guests ||
       !rooms?.length
     ) {
-      return {
-        statusCode: 400,
-        body: JSON.stringify({ message: "Missing data in booking" }),
-      };
+      return sendResponse(400, { message: "Missing data in booking" });
     }
 
     const nights =
       (new Date(checkOutDate) - new Date(checkInDate)) / (1000 * 60 * 60 * 24);
 
     if (nights <= 0) {
-      return {
-        statusCode: 400,
-        body: JSON.stringify({ message: "Invalid dates" }),
-      };
+      return sendResponse(400, { message: "Invalid dates" });
     }
 
     let totalCapacity = 0;
@@ -45,12 +39,9 @@ export async function handler(event) {
       const { roomType, count } = room;
 
       if (!roomType || count <= 0) {
-        return {
-          statusCode: 400,
-          body: JSON.stringify({
-            message: `Invalid roomType or count: ${roomType}`,
-          }),
-        };
+        return sendResponse(400, {
+          message: `Invalid roomType or count: ${roomType}`,
+        });
       }
 
       // Hämtar info om rum från DynamoDB
@@ -66,12 +57,9 @@ export async function handler(event) {
       const item = roomData.Item;
 
       if (!item) {
-        return {
-          statusCode: 400,
-          body: JSON.stringify({
-            message: `Could not find room type: ${roomType}`,
-          }),
-        };
+        return sendResponse(400, {
+          message: `Could not find room type: ${roomType}`,
+        });
       }
 
       const available = parseInt(item.quantity.N);
@@ -79,12 +67,9 @@ export async function handler(event) {
       const capacity = parseInt(item.maxGuests.N);
 
       if (available < count) {
-        return {
-          statusCode: 400,
-          body: JSON.stringify({
-            message: `Not enough ${roomType} rooms. Requested: ${count}, Available: ${available}`,
-          }),
-        };
+        return sendResponse(400, {
+          message: `Not enough ${roomType} rooms. Requested: ${count}, Available: ${available}`,
+        });
       }
 
       totalCapacity += capacity * count;
@@ -109,12 +94,9 @@ export async function handler(event) {
 
     // Kontroll av antal gäster mot kapacitet
     if (totalCapacity < guests) {
-      return {
-        statusCode: 400,
-        body: JSON.stringify({
-          message: `Selected rooms can not accomodate ${guests} guests. Total capacity: ${totalCapacity}`,
-        }),
-      };
+      return sendResponse(400, {
+        message: `Selected rooms can not accomodate ${guests} guests. Total capacity: ${totalCapacity}`,
+      });
     }
 
     const bookingId = uuidv4();
@@ -144,20 +126,17 @@ export async function handler(event) {
       new TransactWriteItemsCommand({ TransactItems: transactItems })
     );
 
-    return {
-      statusCode: 201,
-      body: JSON.stringify({
-        message: "Booking has been confirmed",
-        bookingId,
-        name,
-        email,
-        guests,
-        checkInDate,
-        checkOutDate,
-        rooms,
-        totalPrice,
-      }),
-    };
+    return sendResponse(201, {
+      message: "Booking has been confirmed",
+      bookingId,
+      name,
+      email,
+      guests,
+      checkInDate,
+      checkOutDate,
+      rooms,
+      totalPrice,
+    });
   } catch (error) {
     console.error("Booking error:", error);
 
@@ -166,9 +145,6 @@ export async function handler(event) {
       message = "One or more room types are already fully booked";
     }
 
-    return {
-      statusCode: 500,
-      body: JSON.stringify({ message }),
-    };
+    return sendResponse(500, { message });
   }
 }
