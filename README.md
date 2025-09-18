@@ -15,10 +15,17 @@ Du kan testa API:et och databasen med Postman/Insomnia via den bifogade collecti
 [Öppna Collection](./assets/Bonza-ai.postman_collection.json)
 
 Exempelanrop:
-- POST   ![POST](assets/images/POST-booking.png)
+- POST   ![POST](assets/images/POST-booking.png)   
+https://eeig1iq9re.execute-api.eu-north-1.amazonaws.com/guest/booking
+
 - PUT    ![PUT](assets/images/UPDATE-booking.png)
+https://eeig1iq9re.execute-api.eu-north-1.amazonaws.com/guest/booking/{bookingId}
+
 - DELETE ![DELETE](assets/images/DELETE-booking.png)
-- GET    ![GET](assets/images/ADMIN-get.png)
+https://eeig1iq9re.execute-api.eu-north-1.amazonaws.com/guest/booking/{bookingId}
+
+- GET    ![GET](assets/images/ADMIN-get.png)            
+https://eeig1iq9re.execute-api.eu-north-1.amazonaws.com/admin/bookings
 
 ## Installation
 För att sätta upp projektet lokalt behöver du ett eget AWS-konto.
@@ -30,7 +37,7 @@ Kör följande i terminalen:
 git clone https://github.com/jakobmalmgren/Bonza-ai.git
 cd Bonza-ai
 npm install -g serverless
-node scripts/seedRooms.mjs
+node scripts/seedRooms.mjs # lägger till rum i databasen som vi utgår ifrån
 sls deploy   # eller serverless deploy
 
 
