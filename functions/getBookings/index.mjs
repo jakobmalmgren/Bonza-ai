@@ -1,5 +1,6 @@
 import { QueryCommand } from "@aws-sdk/client-dynamodb";
 import { client } from "../../services/db.mjs";
+import { sendResponse } from "../../utils/responses/index.mjs";
 
 export const handler = async (event) => {
   try {
@@ -12,25 +13,15 @@ export const handler = async (event) => {
     const result = await client.send(getAllBookingsCommand);
     console.log("RESULTT!:", result);
 
-    return {
-      statusCode: 200,
-      body: JSON.stringify(
-        {
-          message: "hämtade alla bokningar",
-          bookings: result.Items,
-          success: true,
-        },
-        null,
-        2
-      ),
-    };
+    return sendResponse(200, {
+      message: "hämtade alla bokningar",
+      bookings: result.Items,
+      success: true,
+    });
   } catch (err) {
-    return {
-      statusCode: 500,
-      body: JSON.stringify({
-        message: err.message,
-        success: false,
-      }),
-    };
+    return sendResponse(500, {
+      message: err.message,
+      success: false,
+    });
   }
 };
