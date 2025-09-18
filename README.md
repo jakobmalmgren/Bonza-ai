@@ -1,4 +1,41 @@
-<!--
+# Bonza.ai – Serverless Hotel Booking API
+
+Det här projektet är en del av Bonza-examen och bygger ett serverless bokningssystem i AWS.
+Systemet hanterar rumstyper, bokningar och administration via ett API.
+
+## Databasöversikt
+Se bifogade diagram i `assets/images`:
+
+- **ROOM-database** ![Exempelbild](assets/images/ROOM-database.png)
+- **ROOM-booking** ![Exempelbild](assets/images/ROOM-booking.png)
+
+## Testa API:et
+Du kan testa API:et och databasen med Postman/Insomnia via den bifogade collection-filen:
+
+[Öppna Collection](./assets/Bonza-ai.postman_collection.json)
+
+Exempelanrop:
+- POST   ![POST](assets/images/POST-booking.png)
+- PUT    ![PUT](assets/images/UPDATE-booking.png)
+- DELETE ![DELETE](assets/images/DELETE-booking.png)
+- GET    ![GET](assets/images/ADMIN-get.png)
+
+## Installation
+För att sätta upp projektet lokalt behöver du ett eget AWS-konto.
+Uppdatera **org** och **role** i `serverless.yml` innan deploy.
+
+Kör följande i terminalen:
+
+```bash
+git clone https://github.com/jakobmalmgren/Bonza-ai.git
+cd Bonza-ai
+npm install -g serverless
+node scripts/seedRooms.mjs
+sls deploy   # eller serverless deploy
+
+
+<!--------------------------------------------------------------------------------------------------------------------------------------------------------------!>
+
 title: 'AWS Simple HTTP Endpoint example in NodeJS'
 description: 'This template demonstrates how to make a simple HTTP API with Node.js running on AWS Lambda and API Gateway using the Serverless Framework.'
 layout: Doc
