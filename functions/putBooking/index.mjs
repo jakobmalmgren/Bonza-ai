@@ -10,15 +10,15 @@ const TABLE_NAME = "HotelTable";
 export async function handler(event) {
   try {
     const bookingId = event.pathParameters.bookingId;
-
+    // Läser och destrukturerar bokningsdata från request body
     const { checkInDate, checkOutDate, guests, rooms } = JSON.parse(event.body);
-
+    // Validerar att inga fält saknas
     if (
       !bookingId ||
       !checkInDate ||
       !checkOutDate ||
       !guests ||
-      !rooms?.length
+      !rooms?.length  //checkar att rooms är ett faktiskt värde, t.ex. inte är tom eller inte finns
     ) {
       return sendResponse(400, { message: "Missing data in booking update" });
     }
@@ -38,21 +38,20 @@ export async function handler(event) {
     if (!oldBooking) {
       return sendResponse(404, { message: "Booking not found" });
     }
-
     const name = oldBooking.name.S;
     const email = oldBooking.email.S;
     const oldRooms = JSON.parse(oldBooking.rooms.S);
-
+    // Räknar ut antal nätter för bokning
     const nights =
       (new Date(checkOutDate) - new Date(checkInDate)) / (1000 * 60 * 60 * 24);
-
+    // Checkar att datumen är giltiga
     if (nights <= 0) {
       return sendResponse(400, { message: "Invalid dates" });
     }
 
     let totalCapacity = 0;
     let totalPrice = 0;
-    const transactItems = [];
+    const transactItems = []; // Lista med alla transaktioner som ska skickas till DynamoDB
 
     // Slå ihop gamla och nya rum till en nettouppdatering
     const roomUpdates = {};
@@ -93,7 +92,7 @@ export async function handler(event) {
           message: `Room type ${roomType} not found`,
         });
       }
-
+      // Måste parsa oavsett om det är nummer för i DynamoDB lagras allt i strängar
       const available = parseInt(item.quantity.N);
       const pricePerNight = parseInt(item.pricePerNight.N);
       const capacity = parseInt(item.maxGuests.N);
@@ -113,6 +112,7 @@ export async function handler(event) {
           countChange > 0 ? "+" : "-"
         } :count`;
 
+        // Uppdaterar och minskar antal tillgängliga rum
         transactItems.push({
           Update: {
             TableName: TABLE_NAME,
@@ -164,7 +164,8 @@ export async function handler(event) {
       },
     });
 
-    // Skicka transaktionen
+    // Kör hela transaktionen med uppdateringar
+    // Antingen lyckas alla eller inga = säker bokning
     await client.send(
       new TransactWriteItemsCommand({ TransactItems: transactItems })
     );
@@ -182,7 +183,8 @@ export async function handler(event) {
     });
   } catch (error) {
     console.error("Update booking error:", error);
-
+    
+    // Fångar fel beroende på vad som är fel anpassas error message.
     let message = "Internal server error";
     if (error.name === "ConditionalCheckFailedException") {
       message = "One or more room types are no longer available";
